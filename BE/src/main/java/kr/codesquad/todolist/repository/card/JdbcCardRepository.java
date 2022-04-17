@@ -2,7 +2,10 @@ package kr.codesquad.todolist.repository.card;
 
 import kr.codesquad.todolist.domain.Card;
 import kr.codesquad.todolist.domain.Section;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -21,7 +24,7 @@ public class JdbcCardRepository implements CardRepository {
 
     private static final Long ORDER_INTERVAL = 1000L;
     private static final Long EMPTY_NUMBER = 0L;
-
+    private final Logger log = LoggerFactory.getLogger(JdbcCardRepository.class);
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public JdbcCardRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -40,12 +43,10 @@ public class JdbcCardRepository implements CardRepository {
     public Optional<Card> findById(Long id) {
         String sql = "select id, member_id, section_id, subject, contents, order_index, created_at, updated_at, deleted " +
                 "from card where id = :id and deleted = false";
-        try {
-            Card card = namedParameterJdbcTemplate.queryForObject(sql, new MapSqlParameterSource("id", id), cardRowMapper());
-            return Optional.ofNullable(card);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        List<Card> cards = namedParameterJdbcTemplate.query(sql, new MapSqlParameterSource("id", id), cardRowMapper());
+        Card card = DataAccessUtils.singleResult(cards);
+        log.info("{}", card);
+        return Optional.ofNullable(card);
     }
 
     @Override

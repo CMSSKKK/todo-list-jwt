@@ -2,6 +2,7 @@ package kr.codesquad.todolist.repository;
 
 import kr.codesquad.todolist.domain.Card;
 import kr.codesquad.todolist.repository.card.JdbcCardRepository;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,15 +40,17 @@ class JdbcCardRepositoryTest {
 
         //when
         Card saved = jdbcCardRepository.save(card);
-
+        SoftAssertions softAssertions = new SoftAssertions();
         //then
-        assertThat(saved.getMemberId()).isEqualTo(card.getMemberId());
+        softAssertions.assertThat(saved.getMemberId()).isEqualTo(card.getMemberId());
         assertThat(saved.getSectionId()).isEqualTo(card.getSectionId());
         assertThat(saved.getSubject()).isEqualTo(card.getSubject());
         assertThat(saved.getContents()).isEqualTo(card.getContents());
         assertThat(saved.isDeleted()).isFalse();
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getOrderIndex()).isNotNull();
+
+        softAssertions.assertAll();
     }
 
     @Test
